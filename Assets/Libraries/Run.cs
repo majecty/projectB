@@ -3,97 +3,96 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Smooth.Slinq;
+using Smooth.Algebraics;
 
 public class Run
 {
     public bool isDone;
     public bool abort;
-    private IEnumerator action;
-
-#region Run.EachFrame
-    public static Run EachFrame (System.Action action)
-    {
-        var tmp = new Run ();
-        tmp.action = _RunEachFrame (tmp, action);
-        tmp.Start ();
-        return tmp;
-    }
-
-    private static IEnumerator _RunEachFrame (Run run, System.Action action)
-    {
-        run.isDone = false;
-        while (true)
-        {
-            if (!run.abort && action != null)
-                action ();
-            else
-                break;
-            yield return null;
-        }
-        run.isDone = true;
-    }
-#endregion Run.EachFrame
-
-#region Run.After
-    public static Run After (float delay, System.Action action)
-    {
-        var tmp = new Run ();
-        tmp.action = _RunAfter (tmp, delay, action);
-        tmp.Start ();
-        return tmp;
-    }
-
-    private static IEnumerator _RunAfter (Run run, float delay, System.Action action)
-    {
-        run.isDone = false;
-        yield return new WaitForSeconds (delay);
-        if (!run.abort && action != null)
-            action ();
-        run.isDone = true;
-    }
-#endregion Run.After
-
-#region Run.Coroutine
-    public static Run Coroutine (IEnumerator coroutine)
-    {
-        var tmp = new Run ();
-        tmp.action = _Coroutine (tmp, coroutine);
-        tmp.Start ();
-        return tmp;
-    }
-
-    private static IEnumerator _Coroutine (Run run, IEnumerator coroutine)
-    {
-        yield return CoroutineHelper.Instance.StartCoroutine (coroutine);
-        run.isDone = true;
-    }
-#endregion Run.Coroutine
+    private Option<IEnumerator> action;
 
     private void Start ()
     {
-        if (action != null)
-            CoroutineHelper.Instance.StartCoroutine (action);
+        action.ForEach((actionValue) => CoroutineHelper.Instance.StartCoroutine (actionValue));
     }
 
     public Coroutine WaitFor
     {
         get
         {
-            return CoroutineHelper.Instance.StartCoroutine (_WaitFor (null));
+            return CoroutineHelper.Instance.StartCoroutine (_WaitFor (onDone: Option<Action>.None));
         }
     }
 
-    public IEnumerator _WaitFor (System.Action onDone)
+    public IEnumerator _WaitFor(Action onDone)
+    {
+        return _WaitFor(onDone.ToSome());
+    }
+
+    public IEnumerator _WaitFor (Option<Action> onDone)
     {
         while (!isDone)
             yield return null;
-        if (onDone != null)
-            onDone ();
+        if (onDone.isSome)
+          onDone.value();
     }
 
     public void Abort ()
     {
         abort = true;
+    }
+
+    public static Run EachFrame (Action action)
+    {
+        var tmp = new Run ();
+        tmp.action = Option.Create(RunEachFrame (tmp, action));
+        tmp.Start ();
+        return tmp;
+    }
+
+    private static IEnumerator RunEachFrame (Run run, Action action)
+    {
+        run.isDone = false;
+        while (true)
+        {
+            if (!run.abort)
+                action();
+            else
+                break;
+            yield return null;
+        }
+        run.isDone = true;
+    }
+
+    public static Run After (float delay, System.Action action)
+    {
+        var tmp = new Run ();
+        tmp.action = Option.Create(RunAfter(tmp, delay, action));
+        tmp.Start ();
+        return tmp;
+    }
+
+    private static IEnumerator RunAfter (Run run, float delay, System.Action action)
+    {
+        run.isDone = false;
+        yield return new WaitForSeconds (delay);
+        if (!run.abort)
+            action();
+        run.isDone = true;
+    }
+
+    public static Run Coroutine (IEnumerator coroutine)
+    {
+        var tmp = new Run ();
+        tmp.action = RunCoroutine(tmp, coroutine).ToOption();
+        tmp.Start ();
+        return tmp;
+    }
+
+    private static IEnumerator RunCoroutine (Run run, IEnumerator coroutine)
+    {
+        yield return CoroutineHelper.Instance.StartCoroutine (coroutine);
+        run.isDone = true;
     }
 
     public Run ExecuteWhenDone (System.Action action)
@@ -102,7 +101,7 @@ public class Run
         tmp.action = _WaitFor (() => {
             action ();
             tmp.isDone = true;
-        });
+        }).ToSome();
         tmp.Start ();
         return tmp;
     }
@@ -110,7 +109,7 @@ public class Run
     public static Run Join (List<Run> runs)
     {
         var tmp = new Run ();
-        tmp.action = _WaitForRuns (tmp, runs);
+        tmp.action = WaitForRuns(tmp, runs).ToSome();
         tmp.Start ();
         return tmp;
     }
@@ -120,7 +119,7 @@ public class Run
         return Join (new List<Run> { r1, r2 });
     }
 
-    private static IEnumerator _WaitForRuns (Run run, List<Run> runs)
+    private static IEnumerator WaitForRuns (Run run, List<Run> runs)
     {
         var remainCount = runs.Count;
 
@@ -141,12 +140,12 @@ public class Run
     public static Run WaitWhile (Func<bool> predicate)
     {
         var tmp = new Run ();
-        tmp.action = _WaitWhile (tmp, predicate);
+        tmp.action = RunWaitWhile(tmp, predicate).ToSome();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator _WaitWhile (Run run, Func<bool> predicate)
+    private static IEnumerator RunWaitWhile (Run run, Func<bool> predicate)
     {
         while (predicate())
         {
@@ -158,45 +157,26 @@ public class Run
     public static Run WaitSeconds (float seconds)
     {
         var tmp = new Run ();
-        tmp.action = _WaitSeconds (tmp, seconds);
+        tmp.action = RrunWaitSeconds(tmp, seconds).ToSome();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator _WaitSeconds (Run run, float seconds)
+    private static IEnumerator RrunWaitSeconds (Run run, float seconds)
     {
         yield return new WaitForSeconds (seconds);
-        run.isDone = true;
-    }
-
-    public Run Then (Run nextRun)
-    {
-        var tmp = new Run ();
-        tmp.action = _Then (tmp, nextRun);
-        tmp.Start ();
-        return tmp;
-    }
-
-    private IEnumerator _Then (Run run, Run nextRun)
-    {
-        while (!isDone)
-            yield return null;
-
-        nextRun.Start ();
-        yield return nextRun.WaitFor;
-
         run.isDone = true;
     }
 
     public Run Then (Func<Run> nextRunGetter)
     {
         var tmp = new Run ();
-        tmp.action = _Then (tmp, nextRunGetter);
+        tmp.action = RunThen(tmp, nextRunGetter).ToSome();
         tmp.Start ();
         return tmp;
     }
 
-    private IEnumerator _Then (Run run, Func<Run> nextRunGetter)
+    private IEnumerator RunThen (Run run, Func<Run> nextRunGetter)
     {
         while (!isDone)
             yield return null;

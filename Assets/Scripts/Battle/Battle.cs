@@ -12,9 +12,9 @@ namespace Battle
 
         enum TurnEndType
         {
-            Win,
-            Lose,
-            NotEnd
+            WIN,
+            LOSE,
+            NOTEND
         }
 
         private static Battle instance;
@@ -32,7 +32,7 @@ namespace Battle
 
         private IEnumerator TurnIterator(State state)
         {
-            var turnEndType = TurnEndType.NotEnd;
+            var turnEndType = TurnEndType.NOTEND;
             while (true)
             {
                 var playerTurn = new PlayerTurn(state, eventReceiver);
@@ -46,7 +46,7 @@ namespace Battle
                 Debug.Log("Turn total: " + state);
 
                 turnEndType = CheckEndTurn();
-                if (turnEndType != TurnEndType.NotEnd)
+                if (turnEndType != TurnEndType.NOTEND)
                 {
                     break;
                 }
@@ -61,17 +61,17 @@ namespace Battle
             TurnEndType endType;
             if (state.Player.Hp <= 0)
             {
-                endType = TurnEndType.Lose;
+                endType = TurnEndType.LOSE;
                 Debug.Log("Lose");
             }
             else if (state.Enemy.Hp <= 0)
             {
-                endType = TurnEndType.Win;
+                endType = TurnEndType.WIN;
                 Debug.Log("Win");
             }
             else
             {
-                endType = TurnEndType.NotEnd;
+                endType = TurnEndType.NOTEND;
             }
             return endType;
         }
@@ -80,11 +80,11 @@ namespace Battle
         {
             switch (turnEndType)
             {
-                case TurnEndType.Win:
+                case TurnEndType.WIN:
                     WinPopup winPopup = FindObjectOfType(typeof(WinPopup)) as WinPopup;
                     winPopup.Set(true);
                     return Run<Unit>.After(3.0f, () => { winPopup.Set(false); return new Unit(); });
-                case TurnEndType.Lose:
+                case TurnEndType.LOSE:
                     LosePopup losePopup = FindObjectOfType(typeof(LosePopup)) as LosePopup;
                     losePopup.Set(true);
                     return Run<Unit>.After(3.0f, () => { losePopup.Set(false); return new Unit(); });

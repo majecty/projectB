@@ -6,7 +6,6 @@ namespace Battle
     public class Battle : MonoBehaviour
     {
         [SerializeField] private EventReceiver eventReceiver;
-        Turn currentTurn;
 
         private void Start()
         {
@@ -15,6 +14,7 @@ namespace Battle
 
         private IEnumerator TurnIterator()
         {
+            Turn currentTurn;
             while (true)
             {
                 currentTurn = new PlayerTurn(eventReceiver);

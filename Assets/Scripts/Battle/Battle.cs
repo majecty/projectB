@@ -90,7 +90,7 @@ namespace Battle
                     return Run<Unit>.After(3.0f, () => { losePopup.Set(false); return new Unit(); });
                 default:
                     Debug.LogError("Invalid turnEndType: " + turnEndType.ToString());
-                    return Run<Unit>.Empty();
+                    return Run<Unit>.Default();
             }
         }
     }

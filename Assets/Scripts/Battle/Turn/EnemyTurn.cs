@@ -24,7 +24,7 @@ namespace Battle
         private Run<Unit> Attack()
         {
             state.Player.DiminishLife(10);
-            return Run<Unit>.Empty();
+            return Run<Unit>.Default();
         }
     }
 }

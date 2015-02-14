@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 namespace Battle
@@ -17,11 +18,11 @@ namespace Battle
         {
             while (true)
             {
-                currentTurn = new PlayerTurn();
+                currentTurn = new PlayerTurn(eventReceiver);
                 var playerTurnRoutine = currentTurn.StartTurn();
                 yield return playerTurnRoutine.WaitFor;
 
-                currentTurn = new EnemyTurn();
+                currentTurn = new EnemyTurn(eventReceiver);
                 var enemyTurnRoutine = currentTurn.StartTurn();
                 yield return enemyTurnRoutine.WaitFor;
             }

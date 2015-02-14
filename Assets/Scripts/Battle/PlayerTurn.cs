@@ -7,17 +7,23 @@ namespace Battle
 {
     public class PlayerTurn : Turn
     {
-        public PlayerTurn(EventReceiver eventReceiver) : base(eventReceiver) { }
+        public PlayerTurn(State state, EventReceiver eventReceiver) : base(state, eventReceiver) { }
 
         public override Run<Unit> StartTurn()
         {
             Run<int> userClickedCard = WaitingCardClick();
-            Run<Unit> clickedMessage = userClickedCard.Then((clickedNum) => {
+            Run<int> clickedMessage = userClickedCard.Then((clickedNum) => {
                 Debug.Log("User clicked " + clickedNum);
-                return Run<Unit>.Default();
+                return Run<int>.Identity(clickedNum);
             });
-            Run<Unit> turnEndMessage = clickedMessage.Then((unit) => {
-                return Run<Unit>.After(0.5f, () => Debug.Log("Player turn end."));
+
+            Run<Unit> attack = clickedMessage.Then((clickedNum) => Attack(clickedNum));
+
+            Run<Unit> turnEndMessage = attack.Then((unit) => {
+                return Run<Unit>.After(0.5f, () => {
+                    Debug.Log("Player turn end.");
+                    return new Unit();
+                });
             });
 
             return turnEndMessage;
@@ -33,6 +39,12 @@ namespace Battle
             };
             eventReceiver.OnClickCardEvent += handler;
             return waitingRun;
+        }
+
+        private Run<Unit> Attack(int cardNum)
+        {
+            state.Enemy.DiminishLife(1);
+            return Run<Unit>.Default();
         }
     }
 }

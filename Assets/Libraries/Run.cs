@@ -83,15 +83,6 @@ public class Run<T>
         run.IsDone = true;
     }
 
-    public static Run<Unit> After(float delay, Action action)
-    {
-        Func<Unit> unitFunc = () => {
-            action();
-            return new Unit();
-        };
-        return Run<Unit>.After(delay, unitFunc);
-    }
-
     public static Run<T> After(float delay, Func<T> func)
     {
         var tmp = new Run<T>();

@@ -15,15 +15,14 @@ namespace Battle
 
         private IEnumerator TurnIterator(State state)
         {
-            Turn currentTurn;
             while (true)
             {
-                currentTurn = new PlayerTurn(state, eventReceiver);
-                var playerTurnRoutine = currentTurn.StartTurn();
+                var playerTurn = new PlayerTurn(state, eventReceiver);
+                var playerTurnRoutine = playerTurn.StartTurn();
                 yield return playerTurnRoutine.WaitFor;
 
-                currentTurn = new EnemyTurn(state, eventReceiver);
-                var enemyTurnRoutine = currentTurn.StartTurn();
+                var enemyTurn = new EnemyTurn(state, eventReceiver);
+                var enemyTurnRoutine = enemyTurn.StartTurn();
                 yield return enemyTurnRoutine.WaitFor;
 
                 Debug.Log("Turn total: " + state);

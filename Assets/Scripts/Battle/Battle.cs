@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Smooth.Algebraics;
 
 namespace Battle
 {
+    using UI;
+
     public class Battle : MonoBehaviour
     {
         [SerializeField] private EventReceiver eventReceiver;
@@ -29,6 +32,7 @@ namespace Battle
 
         private IEnumerator TurnIterator(State state)
         {
+            var turnEndType = TurnEndType.NotEnd;
             while (true)
             {
                 var playerTurn = new PlayerTurn(state, eventReceiver);
@@ -41,7 +45,7 @@ namespace Battle
 
                 Debug.Log("Turn total: " + state);
 
-                var turnEndType = EndTurn();
+                turnEndType = CheckEndTurn();
                 if (turnEndType != TurnEndType.NotEnd)
                 {
                     break;
@@ -49,9 +53,10 @@ namespace Battle
             }
 
             Debug.Log("Game End!");
+            AnimateGameEnd(turnEndType);
         }
 
-        private TurnEndType EndTurn()
+        private TurnEndType CheckEndTurn()
         {
             TurnEndType endType;
             if (state.Player.Hp <= 0)
@@ -69,6 +74,24 @@ namespace Battle
                 endType = TurnEndType.NotEnd;
             }
             return endType;
+        }
+
+        private Run<Unit> AnimateGameEnd(TurnEndType turnEndType)
+        {
+            switch (turnEndType)
+            {
+                case TurnEndType.Win:
+                    WinPopup winPopup = FindObjectOfType(typeof(WinPopup)) as WinPopup;
+                    winPopup.Set(true);
+                    return Run<Unit>.After(3.0f, () => { winPopup.Set(false); return new Unit(); });
+                case TurnEndType.Lose:
+                    LosePopup losePopup = FindObjectOfType(typeof(LosePopup)) as LosePopup;
+                    losePopup.Set(true);
+                    return Run<Unit>.After(3.0f, () => { losePopup.Set(false); return new Unit(); });
+                default:
+                    Debug.LogError("Invalid turnEndType: " + turnEndType.ToString());
+                    return Run<Unit>.Empty();
+            }
         }
     }
 }

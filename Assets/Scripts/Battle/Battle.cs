@@ -7,9 +7,16 @@ namespace Battle
     {
         [SerializeField] private EventReceiver eventReceiver;
 
-        private void Start()
+        private static Battle instance;
+        public static Battle Instance { get { return instance; } }
+
+        private State state;
+        public State State { get { return state; } }
+
+        private void Awake()
         {
-            var state = new State();
+            instance = this;
+            state = new State();
             StartCoroutine(TurnIterator(state));
         }
 

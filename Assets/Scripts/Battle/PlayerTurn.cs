@@ -14,7 +14,7 @@ namespace Battle
             Run<int> userClickedCard = WaitingCardClick();
             var clickedMessage = userClickedCard.Then((clickedCardIndex) => {
                 Debug.Log("User clicked " + clickedCardIndex);
-                return Run<Unit>.Empty();
+                return Run<Unit>.Default();
             });
 
             Run<Unit> attack = userClickedCard.Then((clickedCardIndex) => Attack(clickedCardIndex));

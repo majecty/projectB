@@ -2,14 +2,33 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Smooth.Algebraics;
 using Smooth.Slinq;
 using Smooth.Algebraics;
 
-public class Run
+public interface Run
 {
-    public bool isDone;
+    bool isDone { get; }
+}
+
+public class Run<T>
+{
+    private bool isDone = false;
+    public bool IsDone
+    {
+        get
+        {
+            return isDone;
+        }
+        private set
+        {
+            isDone = value;
+        }
+    }
+
     public bool abort;
     private Option<IEnumerator> action;
+    T returnValue;
 
     private void Start ()
     {
@@ -31,7 +50,7 @@ public class Run
 
     public IEnumerator _WaitFor (Option<Action> onDone)
     {
-        while (!isDone)
+        while (!IsDone)
             yield return null;
         if (onDone.isSome)
           onDone.value();
@@ -42,17 +61,29 @@ public class Run
         abort = true;
     }
 
-    public static Run EachFrame (Action action)
+    public void Fire(T value)
     {
-        var tmp = new Run ();
-        tmp.action = Option.Create(RunEachFrame (tmp, action));
+        IsDone = true;
+        returnValue = value;
+    }
+
+    public static Run<Unit> Empty()
+    {
+        return After(0, () => { });
+    }
+
+    public static Run<Unit> EachFrame (System.Action action)
+    {
+        var tmp = new Run<Unit>();
+        tmp.action = RunEachFrame(tmp, action).ToSome();
+        tmp.returnValue = new Unit();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator RunEachFrame (Run run, Action action)
+    private static IEnumerator RunEachFrame (Run<Unit> run, Action action)
     {
-        run.isDone = false;
+        run.IsDone = false;
         while (true)
         {
             if (!run.abort)
@@ -61,129 +92,83 @@ public class Run
                 break;
             yield return null;
         }
-        run.isDone = true;
+        run.IsDone = true;
     }
 
-    public static Run After (float delay, System.Action action)
+    public static Run<Unit> After (float delay, System.Action action)
     {
-        var tmp = new Run ();
-        tmp.action = Option.Create(RunAfter(tmp, delay, action));
+        var tmp = new Run<Unit>();
+        tmp.action = RunAfter(tmp, delay, action).ToSome();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator RunAfter (Run run, float delay, System.Action action)
+    private static IEnumerator RunAfter (Run<Unit> run, float delay, System.Action action)
     {
-        run.isDone = false;
+        run.IsDone = false;
         yield return new WaitForSeconds (delay);
         if (!run.abort)
             action();
-        run.isDone = true;
+        run.IsDone = true;
     }
 
-    public static Run Coroutine (IEnumerator coroutine)
+    private static IEnumerator RunWaitWhile (Run<T> run, Func<bool> predicate)
     {
-        var tmp = new Run ();
-        tmp.action = RunCoroutine(tmp, coroutine).ToOption();
-        tmp.Start ();
-        return tmp;
-    }
-
-    private static IEnumerator RunCoroutine (Run run, IEnumerator coroutine)
-    {
-        yield return CoroutineHelper.Instance.StartCoroutine (coroutine);
-        run.isDone = true;
-    }
-
-    public Run ExecuteWhenDone (System.Action action)
-    {
-        var tmp = new Run ();
-        tmp.action = _WaitFor (() => {
-            action ();
-            tmp.isDone = true;
-        }).ToSome();
-        tmp.Start ();
-        return tmp;
-    }
-
-    public static Run Join (List<Run> runs)
-    {
-        var tmp = new Run ();
-        tmp.action = WaitForRuns(tmp, runs).ToSome();
-        tmp.Start ();
-        return tmp;
-    }
-
-    public static Run Join (Run r1, Run r2)
-    {
-        return Join (new List<Run> { r1, r2 });
-    }
-
-    private static IEnumerator WaitForRuns (Run run, List<Run> runs)
-    {
-        var remainCount = runs.Count;
-
-        runs.ForEach ((newRun) => {
-            newRun.ExecuteWhenDone (() => {
-                remainCount -= 1;
-            });
-        });
-
-        Func<bool> isComplete = () => remainCount != 0;
-        while (isComplete())
+        while (!run.abort &&  predicate())
         {
             yield return null;
         }
-        run.isDone = true;
+        run.IsDone = true;
     }
 
-    public static Run WaitWhile (Func<bool> predicate)
+    public static Run<Unit> WaitSeconds (float seconds)
     {
-        var tmp = new Run ();
-        tmp.action = RunWaitWhile(tmp, predicate).ToSome();
+        var tmp = new Run<Unit>();
+        tmp.action = RunWaitSeconds (tmp, seconds).ToSome();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator RunWaitWhile (Run run, Func<bool> predicate)
-    {
-        while (predicate())
-        {
-            yield return null;
-        }
-        run.isDone = true;
-    }
-
-    public static Run WaitSeconds (float seconds)
-    {
-        var tmp = new Run ();
-        tmp.action = RrunWaitSeconds(tmp, seconds).ToSome();
-        tmp.Start ();
-        return tmp;
-    }
-
-    private static IEnumerator RrunWaitSeconds (Run run, float seconds)
+    private static IEnumerator RunWaitSeconds (Run<Unit> run, float seconds)
     {
         yield return new WaitForSeconds (seconds);
-        run.isDone = true;
+        run.IsDone = true;
     }
 
-    public Run Then (Func<Run> nextRunGetter)
+    public static Run<T> MakeDeferred()
     {
-        var tmp = new Run ();
-        tmp.action = RunThen(tmp, nextRunGetter).ToSome();
-        tmp.Start ();
-        return tmp;
+        var newRun = new Run<T>();
+        return newRun;
     }
 
-    private IEnumerator RunThen (Run run, Func<Run> nextRunGetter)
+    public Run<R> Then<R>(Func<T, Run<R>> then)
     {
-        while (!isDone)
+        if (isDone)
+        {
+            return then(returnValue);
+        }
+
+        var newRun = new Run<R>();
+        newRun.action = RunThen(manager: newRun, previousRun: this, then: then).ToSome();
+        newRun.Start();
+        return newRun;
+    }
+
+    private static IEnumerator RunThen<R>(Run<R> manager, Run<T> previousRun, Func<T, Run<R>> then)
+    {
+        while (!manager.abort && !previousRun.isDone)
+        {
             yield return null;
+        }
 
-        var nRun = nextRunGetter ();
-        yield return nRun.WaitFor;
+        var nextRun = then(previousRun.returnValue);
 
-        run.isDone = true;
+        while (!manager.abort && !nextRun.isDone)
+        {
+            yield return null;
+        }
+
+        manager.isDone = true;
+        manager.returnValue = nextRun.returnValue;
     }
 }

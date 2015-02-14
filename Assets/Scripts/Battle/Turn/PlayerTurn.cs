@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using Smooth.Algebraics;
 
 namespace Battle
@@ -11,13 +11,13 @@ namespace Battle
 
         public override Run<Unit> StartTurn()
         {
-            Run<int> _userClickedCard = WaitingCardClick();
-            var _clickedMessage = _userClickedCard.Then((_clickedCardIndex) => {
-                Debug.Log("User clicked " + _clickedCardIndex);
+            Run<List<int>> _userClickedCardIndexes = WaitingCardClick();
+            var _clickedMessage = _userClickedCardIndexes.Then((_clickedCardIndexes) => {
+                Debug.Log("User clicked " + _clickedCardIndexes);
                 return Run<Unit>.Default();
             });
 
-            Run<Unit> _attack = _userClickedCard.Then((_clickedCardIndex) => Attack(_clickedCardIndex));
+            Run<Unit> _attack = _userClickedCardIndexes.Then((_clickedCardIndexes) => Attack(_clickedCardIndexes));
 
             Run<Unit> _turnEndMessage = _attack.Then((_unit) => {
                 return Run<Unit>.After(0.5f, () => {
@@ -29,21 +29,30 @@ namespace Battle
             return _turnEndMessage;
         }
 
-        private Run<int> WaitingCardClick()
+        private Run<List<int>> WaitingCardClick()
         {
-            var _waitingRun = Run<int>.MakeDeferred();
-            Action<int> _handler;
-            _handler = (num) => {
-                _waitingRun.Fire(num);
-                mEventReceiver.OnClickCardEvent -= _handler;
+            var _waitingRun = Run<List<int>>.MakeDeferred();
+            var _clickedIndexes = new List<int>();
+
+            Action<int> _clickedCardHandler;
+            _clickedCardHandler = (_clickedCardIndex) => _clickedIndexes.Add(_clickedCardIndex);
+            mEventReceiver.OnClickCardEvent += _clickedCardHandler;
+
+            Action _turnEndButtonHandler;
+            _turnEndButtonHandler = () => {
+                _waitingRun.Fire(_clickedIndexes);
+                mEventReceiver.OnClickCardEvent -= _clickedCardHandler;
+                mEventReceiver.OnClickTurnEndEvent -= _turnEndButtonHandler;
             };
-            mEventReceiver.OnClickCardEvent += _handler;
+            mEventReceiver.OnClickTurnEndEvent += _turnEndButtonHandler;
+
             return _waitingRun;
         }
 
-        private Run<Unit> Attack(int cardNum)
+        private Run<Unit> Attack(List<int> cardIndexes)
         {
-            mState.enemy.DiminishLife(1);
+            //FIXME: card's stat should be applied.
+            mState.enemy.DiminishLife(10 * cardIndexes.Count);
             return Run<Unit>.Default();
         }
     }

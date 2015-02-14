@@ -13,4 +13,14 @@ public class EventReceiver : MonoBehaviour
         else
             Debug.Log("There is no binded event handler.");
     }
+
+    public event Action OnClickTurnEndEvent;
+    public void OnClickTurnEnd()
+    {
+        // c# event keyward need null check.
+        if (OnClickTurnEndEvent != null)
+            OnClickTurnEndEvent();
+        else
+            Debug.Log("There is nos binded event handler");
+    }
 }

@@ -7,16 +7,16 @@ namespace Battle.UI
     [RequireComponent (typeof (Slider))]
     public class EnemyHpBar : MonoBehaviour
     {
-        private Slider slider;
+        private Slider mSlider;
 
         private void Start()
         {
-            slider = GetComponent<Slider>();
+            mSlider = GetComponent<Slider>();
         }
 
         private void Update()
         {
-            slider.value = (float)Battle.Instance.State.Enemy.Hp / 100;
+            mSlider.value = (float)Battle.Instance.State.enemy.Hp / 100;
         }
     }
 }

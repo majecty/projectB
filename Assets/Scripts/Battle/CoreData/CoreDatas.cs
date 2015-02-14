@@ -7,9 +7,9 @@ namespace Battle.CoreData
         private int hp = 100;
         public int Hp { get { return hp; } }
 
-        public void DiminishLife(float damage)
+        public void DiminishLife(float _damage)
         {
-            hp -= (int)damage;
+            hp -= (int)_damage;
         }
     }
 
@@ -18,9 +18,9 @@ namespace Battle.CoreData
         private int hp = 100;
         public int Hp { get { return hp; } }
 
-        public void DiminishLife(float damage)
+        public void DiminishLife(float _damage)
         {
-            hp -= (int)damage;
+            hp -= (int)_damage;
         }
     }
 }

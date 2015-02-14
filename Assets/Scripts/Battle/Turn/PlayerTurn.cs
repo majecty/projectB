@@ -7,43 +7,43 @@ namespace Battle
 {
     public class PlayerTurn : Turn
     {
-        public PlayerTurn(State state, EventReceiver eventReceiver) : base(state, eventReceiver) { }
+        public PlayerTurn(State _state, EventReceiver eventReceiver) : base(_state, eventReceiver) { }
 
         public override Run<Unit> StartTurn()
         {
-            Run<int> userClickedCard = WaitingCardClick();
-            var clickedMessage = userClickedCard.Then((clickedCardIndex) => {
-                Debug.Log("User clicked " + clickedCardIndex);
+            Run<int> _userClickedCard = WaitingCardClick();
+            var _clickedMessage = _userClickedCard.Then((_clickedCardIndex) => {
+                Debug.Log("User clicked " + _clickedCardIndex);
                 return Run<Unit>.Default();
             });
 
-            Run<Unit> attack = userClickedCard.Then((clickedCardIndex) => Attack(clickedCardIndex));
+            Run<Unit> _attack = _userClickedCard.Then((_clickedCardIndex) => Attack(_clickedCardIndex));
 
-            Run<Unit> turnEndMessage = attack.Then((unit) => {
+            Run<Unit> _turnEndMessage = _attack.Then((_unit) => {
                 return Run<Unit>.After(0.5f, () => {
                     Debug.Log("Player turn end.");
                     return new Unit();
                 });
             });
 
-            return turnEndMessage;
+            return _turnEndMessage;
         }
 
         private Run<int> WaitingCardClick()
         {
-            var waitingRun = Run<int>.MakeDeferred();
-            Action<int> handler;
-            handler = (num) => {
-                waitingRun.Fire(num);
-                eventReceiver.OnClickCardEvent -= handler;
+            var _waitingRun = Run<int>.MakeDeferred();
+            Action<int> _handler;
+            _handler = (num) => {
+                _waitingRun.Fire(num);
+                mEventReceiver.OnClickCardEvent -= _handler;
             };
-            eventReceiver.OnClickCardEvent += handler;
-            return waitingRun;
+            mEventReceiver.OnClickCardEvent += _handler;
+            return _waitingRun;
         }
 
         private Run<Unit> Attack(int cardNum)
         {
-            state.Enemy.DiminishLife(1);
+            mState.enemy.DiminishLife(1);
             return Run<Unit>.Default();
         }
     }

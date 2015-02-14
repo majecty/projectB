@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Smooth.Algebraics;
+using Battle.UI;
 
 namespace Battle
 {
-    using UI;
-
     public class Battle : MonoBehaviour
     {
-        [SerializeField] private EventReceiver eventReceiver;
+        [SerializeField] private EventReceiver mEventReceiver;
 
         enum TurnEndType
         {
@@ -17,79 +16,79 @@ namespace Battle
             NOTEND
         }
 
-        private static Battle instance;
-        public static Battle Instance { get { return instance; } }
+        private static Battle mInstance;
+        public static Battle Instance { get { return mInstance; } }
 
-        private State state;
-        public State State { get { return state; } }
+        private State mState;
+        public State State { get { return mState; } }
 
         private void Awake()
         {
-            instance = this;
-            state = new State();
-            StartCoroutine(TurnIterator(state));
+            mInstance = this;
+            mState = new State();
+            StartCoroutine(TurnIterator(mState));
         }
 
-        private IEnumerator TurnIterator(State state)
+        private IEnumerator TurnIterator(State _state)
         {
-            var turnEndType = TurnEndType.NOTEND;
+            var _turnEndType = TurnEndType.NOTEND;
             while (true)
             {
-                var playerTurn = new PlayerTurn(state, eventReceiver);
+                var playerTurn = new PlayerTurn(_state, mEventReceiver);
                 var playerTurnRoutine = playerTurn.StartTurn();
                 yield return playerTurnRoutine.WaitFor;
 
-                var enemyTurn = new EnemyTurn(state, eventReceiver);
+                var enemyTurn = new EnemyTurn(_state, mEventReceiver);
                 var enemyTurnRoutine = enemyTurn.StartTurn();
                 yield return enemyTurnRoutine.WaitFor;
 
-                Debug.Log("Turn total: " + state);
+                Debug.Log("Turn total: " + _state);
 
-                turnEndType = CheckEndTurn();
-                if (turnEndType != TurnEndType.NOTEND)
+                _turnEndType = CheckEndTurn();
+                if (_turnEndType != TurnEndType.NOTEND)
                 {
                     break;
                 }
             }
 
             Debug.Log("Game End!");
-            AnimateGameEnd(turnEndType);
+            AnimateGameEnd(_turnEndType);
         }
 
         private TurnEndType CheckEndTurn()
         {
-            TurnEndType endType;
-            if (state.Player.Hp <= 0)
+            TurnEndType _endType;
+            if (mState.player.Hp <= 0)
             {
-                endType = TurnEndType.LOSE;
+                _endType = TurnEndType.LOSE;
                 Debug.Log("Lose");
             }
-            else if (state.Enemy.Hp <= 0)
+            else if (mState.enemy.Hp <= 0)
             {
-                endType = TurnEndType.WIN;
+                _endType = TurnEndType.WIN;
                 Debug.Log("Win");
             }
             else
             {
-                endType = TurnEndType.NOTEND;
+                _endType = TurnEndType.NOTEND;
             }
-            return endType;
+            return _endType;
         }
 
-        private Run<Unit> AnimateGameEnd(TurnEndType turnEndType)
+        private Run<Unit> AnimateGameEnd(TurnEndType _turnEndType)
         {
-            switch (turnEndType)
+            switch (_turnEndType)
             {
                 case TurnEndType.WIN:
-                    WinPopup winPopup = FindObjectOfType(typeof(WinPopup)) as WinPopup;
-                    winPopup.Set(true);
-                    return Run<Unit>.After(3.0f, () => { winPopup.Set(false); return new Unit(); });
+                    WinPopup _winPopup = FindObjectOfType(typeof(WinPopup)) as WinPopup;
+                    _winPopup.Set(true);
+                    return Run<Unit>.After(3.0f, () => { _winPopup.Set(false); return new Unit(); });
                 case TurnEndType.LOSE:
-                    LosePopup losePopup = FindObjectOfType(typeof(LosePopup)) as LosePopup;
-                    losePopup.Set(true);
-                    return Run<Unit>.After(3.0f, () => { losePopup.Set(false); return new Unit(); });
+                    LosePopup _losePopup = FindObjectOfType(typeof(LosePopup)) as LosePopup;
+                    _losePopup.Set(true);
+                    return Run<Unit>.After(3.0f, () => { _losePopup.Set(false); return new Unit(); });
                 default:
-                    Debug.LogError("Invalid turnEndType: " + turnEndType.ToString());
+                    Debug.LogError("Invalid turnEndType: " + _turnEndType.ToString());
                     return Run<Unit>.Default();
             }
         }

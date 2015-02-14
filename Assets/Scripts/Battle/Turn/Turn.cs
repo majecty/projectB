@@ -6,13 +6,13 @@ namespace Battle
 {
     public abstract class Turn
     {
-        protected EventReceiver eventReceiver;
-        protected State state;
+        protected EventReceiver mEventReceiver;
+        protected State mState;
 
-        public Turn(State state, EventReceiver eventReceiver)
+        public Turn(State _state, EventReceiver _eventReceiver)
         {
-            this.state = state;
-            this.eventReceiver = eventReceiver;
+            this.mState = _state;
+            this.mEventReceiver = _eventReceiver;
         }
 
         public abstract Run<Unit> StartTurn();

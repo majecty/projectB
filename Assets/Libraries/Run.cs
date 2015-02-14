@@ -10,33 +10,33 @@ public class Run<T>
     public bool IsDone { get; private set; }
 
     public bool abort;
-    private Option<IEnumerator> action;
-    T returnValue;
+    private Option<IEnumerator> mAction;
+    T mReturnValue;
 
     private void Start ()
     {
-        action.ForEach((actionValue) => CoroutineHelper.Instance.StartCoroutine (actionValue));
+        mAction.ForEach((actionValue) => CoroutineHelper.Instance.StartCoroutine (actionValue));
     }
 
     public Coroutine WaitFor
     {
         get
         {
-            return CoroutineHelper.Instance.StartCoroutine (_WaitFor (onDone: Option<Action>.None));
+            return CoroutineHelper.Instance.StartCoroutine (_WaitFor (_onDone: Option<Action>.None));
         }
     }
 
-    public IEnumerator _WaitFor(Action onDone)
+    public IEnumerator _WaitFor(Action _onDone)
     {
-        return _WaitFor(onDone.ToSome());
+        return _WaitFor(_onDone.ToSome());
     }
 
-    public IEnumerator _WaitFor (Option<Action> onDone)
+    public IEnumerator _WaitFor (Option<Action> _onDone)
     {
         while (!IsDone)
             yield return null;
-        if (onDone.isSome)
-          onDone.value();
+        if (_onDone.isSome)
+          _onDone.value();
     }
 
     public void Abort ()
@@ -44,10 +44,10 @@ public class Run<T>
         abort = true;
     }
 
-    public void Fire(T value)
+    public void Fire(T _value)
     {
         IsDone = true;
-        returnValue = value;
+        mReturnValue = _value;
     }
 
     public static Run<T> Default()
@@ -55,72 +55,72 @@ public class Run<T>
         return After(0, () => default(T));
     }
 
-    public static Run<T> Identity(T input)
+    public static Run<T> Identity(T _input)
     {
-        return After(0, () => input);
+        return After(0, () => _input);
     }
 
-    public static Run<Unit> EachFrame (System.Action action)
+    public static Run<Unit> EachFrame (System.Action _action)
     {
         var tmp = new Run<Unit>();
-        tmp.action = RunEachFrame(tmp, action).ToSome();
-        tmp.returnValue = new Unit();
+        tmp.mAction = RunEachFrame(tmp, _action).ToSome();
+        tmp.mReturnValue = new Unit();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator RunEachFrame (Run<Unit> run, Action action)
+    private static IEnumerator RunEachFrame (Run<Unit> _run, Action _action)
     {
-        run.IsDone = false;
+        _run.IsDone = false;
         while (true)
         {
-            if (!run.abort)
-                action();
+            if (!_run.abort)
+                 _action();
             else
                 break;
             yield return null;
         }
-        run.IsDone = true;
+        _run.IsDone = true;
     }
 
-    public static Run<T> After(float delay, Func<T> func)
+    public static Run<T> After(float _delay, Func<T> _func)
     {
-        var tmp = new Run<T>();
-        tmp.action = RunAfter(tmp, delay, func).ToSome();
-        tmp.Start ();
-        return tmp;
+        var _tmp = new Run<T>();
+        _tmp.mAction = RunAfter(_tmp, _delay, _func).ToSome();
+        _tmp.Start ();
+        return _tmp;
     }
 
-    private static IEnumerator RunAfter (Run<T> run, float delay, Func<T> func)
+    private static IEnumerator RunAfter (Run<T> _run, float _delay, Func<T> _func)
     {
-        run.IsDone = false;
-        yield return new WaitForSeconds (delay);
-        if (!run.abort)
-            run.returnValue = func();
-        run.IsDone = true;
+        _run.IsDone = false;
+        yield return new WaitForSeconds (_delay);
+        if (!_run.abort)
+            _run.mReturnValue = _func();
+        _run.IsDone = true;
     }
 
-    private static IEnumerator RunWaitWhile (Run<T> run, Func<bool> predicate)
+    private static IEnumerator RunWaitWhile (Run<T> _run, Func<bool> _predicate)
     {
-        while (!run.abort &&  predicate())
+        while (!_run.abort &&  _predicate())
         {
             yield return null;
         }
-        run.IsDone = true;
+        _run.IsDone = true;
     }
 
-    public static Run<Unit> WaitSeconds (float seconds)
+    public static Run<Unit> WaitSeconds (float _seconds)
     {
-        var tmp = new Run<Unit>();
-        tmp.action = RunWaitSeconds (tmp, seconds).ToSome();
-        tmp.Start ();
-        return tmp;
+        var _tmp = new Run<Unit>();
+        _tmp.mAction = RunWaitSeconds (_tmp, _seconds).ToSome();
+        _tmp.Start ();
+        return _tmp;
     }
 
-    private static IEnumerator RunWaitSeconds (Run<Unit> run, float seconds)
+    private static IEnumerator RunWaitSeconds (Run<Unit> _run, float _seconds)
     {
-        yield return new WaitForSeconds (seconds);
-        run.IsDone = true;
+        yield return new WaitForSeconds (_seconds);
+        _run.IsDone = true;
     }
 
     public static Run<T> MakeDeferred()
@@ -129,34 +129,34 @@ public class Run<T>
         return newRun;
     }
 
-    public Run<R> Then<R>(Func<T, Run<R>> then)
+    public Run<R> Then<R>(Func<T, Run<R>> _then)
     {
         if (IsDone)
         {
-            return then(returnValue);
+            return _then(mReturnValue);
         }
 
-        var newRun = new Run<R>();
-        newRun.action = RunThen(manager: newRun, previousRun: this, then: then).ToSome();
-        newRun.Start();
-        return newRun;
+        var _newRun = new Run<R>();
+        _newRun.mAction = RunThen(_manager: _newRun, _previousRun: this, _then: _then).ToSome();
+        _newRun.Start();
+        return _newRun;
     }
 
-    private static IEnumerator RunThen<R>(Run<R> manager, Run<T> previousRun, Func<T, Run<R>> then)
+    private static IEnumerator RunThen<R>(Run<R> _manager, Run<T> _previousRun, Func<T, Run<R>> _then)
     {
-        while (!manager.abort && !previousRun.IsDone)
+        while (!_manager.abort && !_previousRun.IsDone)
         {
             yield return null;
         }
 
-        var nextRun = then(previousRun.returnValue);
+        var _nextRun = _then(_previousRun.mReturnValue);
 
-        while (!manager.abort && !nextRun.IsDone)
+        while (!_manager.abort && !_nextRun.IsDone)
         {
             yield return null;
         }
 
-        manager.IsDone = true;
-        manager.returnValue = nextRun.returnValue;
+        _manager.IsDone = true;
+        _manager.mReturnValue = _nextRun.mReturnValue;
     }
 }

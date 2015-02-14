@@ -15,7 +15,7 @@ namespace Battle.UI
 
         private void Update()
         {
-            slider.value = (float)Battle.Instance.State.Player.Hp / 100;
+            slider.value = (float)Battle.Instance.State.player.Hp / 100;
         }
     }
 }

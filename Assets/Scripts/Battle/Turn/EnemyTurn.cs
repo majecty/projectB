@@ -10,8 +10,8 @@ namespace Battle
 
         public override Run<Unit> StartTurn()
         {
-            var attack =  Attack();
-            var turnEndMessage = attack.Then((unit) => {
+            var _attack = Attack();
+            var turnEndMessage = _attack.Then((unit) => {
                 return Run<Unit>.After(1.0f, () => {
                     Debug.Log ("Enemy turn end.");
                     return new Unit();
@@ -23,7 +23,7 @@ namespace Battle
 
         private Run<Unit> Attack()
         {
-            state.Player.DiminishLife(10);
+            mState.player.DiminishLife(10);
             return Run<Unit>.Default();
         }
     }

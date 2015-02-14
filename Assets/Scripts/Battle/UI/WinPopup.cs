@@ -8,9 +8,9 @@ namespace Battle.UI
     {
         [SerializeField] private Image image;
 
-        public void Set(bool flag)
+        public void Set(bool _flag)
         {
-            image.gameObject.SetActive(flag);
+            image.gameObject.SetActive(_flag);
         }
     }
 }

@@ -4,21 +4,21 @@ namespace Battle
 {
     public class State
     {
-        public readonly Player Player;
-        public readonly Enemy Enemy;
+        public readonly Player player;
+        public readonly Enemy enemy;
 
         public State()
         {
-            Player = new Player();
-            Enemy = new Enemy();
+            player = new Player();
+            enemy = new Enemy();
         }
 
         public override string ToString()
         {
-            var log = "Player: " + Player.Hp;
-            log += "\nEnemy: " + Enemy.Hp;
+            var _log = "Player: " + player.Hp;
+            _log += "\nEnemy: " + enemy.Hp;
 
-            return log;
+            return _log;
         }
     }
 }

@@ -50,9 +50,14 @@ public class Run<T>
         returnValue = value;
     }
 
-    public static Run<Unit> Empty()
+    public static Run<T> Default()
     {
-        return After(0, () => { });
+        return After(0, () => default(T));
+    }
+
+    public static Run<T> Identity(T input)
+    {
+        return After(0, () => input);
     }
 
     public static Run<Unit> EachFrame (System.Action action)
@@ -78,20 +83,29 @@ public class Run<T>
         run.IsDone = true;
     }
 
-    public static Run<Unit> After (float delay, System.Action action)
+    public static Run<Unit> After(float delay, Action action)
     {
-        var tmp = new Run<Unit>();
-        tmp.action = RunAfter(tmp, delay, action).ToSome();
+        Func<Unit> unitFunc = () => {
+            action();
+            return new Unit();
+        };
+        return Run<Unit>.After(delay, unitFunc);
+    }
+
+    public static Run<T> After(float delay, Func<T> func)
+    {
+        var tmp = new Run<T>();
+        tmp.action = RunAfter(tmp, delay, func).ToSome();
         tmp.Start ();
         return tmp;
     }
 
-    private static IEnumerator RunAfter (Run<Unit> run, float delay, System.Action action)
+    private static IEnumerator RunAfter (Run<T> run, float delay, Func<T> func)
     {
         run.IsDone = false;
         yield return new WaitForSeconds (delay);
         if (!run.abort)
-            action();
+            run.returnValue = func();
         run.IsDone = true;
     }
 

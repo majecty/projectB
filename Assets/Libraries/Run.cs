@@ -5,11 +5,6 @@ using System.Collections.Generic;
 using Smooth.Algebraics;
 using Smooth.Slinq;
 
-public interface Run
-{
-    bool isDone { get; }
-}
-
 public class Run<T>
 {
     private bool isDone = false;

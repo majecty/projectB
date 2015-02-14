@@ -5,6 +5,7 @@ namespace Battle
 {
     public class Battle : MonoBehaviour
     {
+        [SerializeField] private EventReceiver eventReceiver;
         Turn currentTurn;
 
         private void Start()

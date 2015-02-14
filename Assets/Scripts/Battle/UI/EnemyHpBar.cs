@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-namespace Battle
+namespace Battle.UI
 {
     [RequireComponent (typeof (Slider))]
     public class EnemyHpBar : MonoBehaviour

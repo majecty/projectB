@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Battle
+namespace Battle.UI
 {
     [RequireComponent (typeof (Slider))]
     public class PlayerHpBar : MonoBehaviour

@@ -12,12 +12,12 @@ namespace Battle
         public override Run<Unit> StartTurn()
         {
             Run<int> userClickedCard = WaitingCardClick();
-            Run<int> clickedMessage = userClickedCard.Then((clickedNum) => {
-                Debug.Log("User clicked " + clickedNum);
-                return Run<int>.Identity(clickedNum);
+            var clickedMessage = userClickedCard.Then((clickedCardIndex) => {
+                Debug.Log("User clicked " + clickedCardIndex);
+                return Run<Unit>.Empty();
             });
 
-            Run<Unit> attack = clickedMessage.Then((clickedNum) => Attack(clickedNum));
+            Run<Unit> attack = userClickedCard.Then((clickedCardIndex) => Attack(clickedCardIndex));
 
             Run<Unit> turnEndMessage = attack.Then((unit) => {
                 return Run<Unit>.After(0.5f, () => {

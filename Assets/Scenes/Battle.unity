@@ -1785,7 +1785,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a7127a38eede43b2990831b3ce1b7ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventReceiver: {fileID: 1152225620}
+  mEventReceiver: {fileID: 1152225620}
 --- !u!4 &1152225619
 Transform:
   m_ObjectHideFlags: 0
@@ -2252,6 +2252,10 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 819571231}
     m_Modifications:
+    - target: {fileID: 11443866, guid: 8219cd96f710e4f9fbaea5fc3dc24b41, type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 22465290, guid: 8219cd96f710e4f9fbaea5fc3dc24b41, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2339,6 +2343,14 @@ Prefab:
     - target: {fileID: 11443866, guid: 8219cd96f710e4f9fbaea5fc3dc24b41, type: 2}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 11443866, guid: 8219cd96f710e4f9fbaea5fc3dc24b41, type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11443866, guid: 8219cd96f710e4f9fbaea5fc3dc24b41, type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8219cd96f710e4f9fbaea5fc3dc24b41, type: 2}

@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Smooth.Algebraics;
 using Smooth.Slinq;
-using Smooth.Algebraics;
 
 public interface Run
 {

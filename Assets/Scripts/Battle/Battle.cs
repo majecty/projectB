@@ -10,21 +10,24 @@ namespace Battle
 
         private void Start()
         {
-            StartCoroutine(TurnIterator());
+            var state = new State();
+            StartCoroutine(TurnIterator(state));
         }
 
-        private IEnumerator TurnIterator()
+        private IEnumerator TurnIterator(State state)
         {
             Turn currentTurn;
             while (true)
             {
-                currentTurn = new PlayerTurn(eventReceiver);
+                currentTurn = new PlayerTurn(state, eventReceiver);
                 var playerTurnRoutine = currentTurn.StartTurn();
                 yield return playerTurnRoutine.WaitFor;
 
-                currentTurn = new EnemyTurn(eventReceiver);
+                currentTurn = new EnemyTurn(state, eventReceiver);
                 var enemyTurnRoutine = currentTurn.StartTurn();
                 yield return enemyTurnRoutine.WaitFor;
+
+                Debug.Log("Turn total: " + state);
             }
         }
     }

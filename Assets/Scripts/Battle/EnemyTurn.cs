@@ -6,11 +6,11 @@ namespace Battle
 {
     public class EnemyTurn : Turn
     {
-        public EnemyTurn(EventReceiver eventReceiver) : base(eventReceiver) { }
+        public EnemyTurn(State state, EventReceiver eventReceiver) : base(state, eventReceiver) { }
 
         public override Run<Unit> StartTurn()
         {
-            return Run<Unit>.After(1.0f, () => Debug.Log ("Enemy turn end."));
+            return Run<Unit>.After(1.0f, () => { Debug.Log ("Enemy turn end."); return new Unit(); });
         }
     }
 }

@@ -7,9 +7,11 @@ namespace Battle
     public abstract class Turn
     {
         protected EventReceiver eventReceiver;
+        protected State state;
 
-        public Turn(EventReceiver eventReceiver)
+        public Turn(State state, EventReceiver eventReceiver)
         {
+            this.state = state;
             this.eventReceiver = eventReceiver;
         }
 

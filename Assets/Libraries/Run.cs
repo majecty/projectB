@@ -63,7 +63,7 @@ public class Run<T>
 
     public static Run<Unit> Empty()
     {
-        return After(0, () => { });
+        return Run<Unit>.After(0, () => new Unit());
     }
 
     public static Run<T> Default()
@@ -97,15 +97,6 @@ public class Run<T>
             yield return null;
         }
         run.IsDone = true;
-    }
-
-    public static Run<Unit> After(float delay, Action action)
-    {
-        Func<Unit> unitFunc = () => {
-            action();
-            return new Unit();
-        };
-        return Run<Unit>.After(delay, unitFunc);
     }
 
     public static Run<T> After(float delay, Func<T> func)

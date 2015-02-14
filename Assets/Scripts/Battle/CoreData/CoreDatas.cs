@@ -6,6 +6,11 @@ namespace Battle.CoreData
     {
         private int hp = 100;
         public int Hp { get { return hp; } }
+
+        public void DiminishLife(float damage)
+        {
+            hp -= (int)damage;
+        }
     }
 
     public class Enemy

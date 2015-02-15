@@ -8,6 +8,7 @@ namespace Battle
     public class Battle : MonoBehaviour
     {
         [SerializeField] private EventReceiver mEventReceiver;
+        public EventReceiver EventReceiver { get { return mEventReceiver; } }
 
         enum TurnEndType
         {

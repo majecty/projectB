@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Smooth.Algebraics;
+using Battle.CoreData;
 
 namespace Battle
 {
@@ -79,7 +80,10 @@ namespace Battle
         private Run<Unit> Attack()
         {
             //FIXME: card's stat should be applied.
-            mState.enemy.DiminishLife(10 * mState.player.ClickedCardIndexes.Count());
+            var _deck = mState.player.ClickedCardIndexes;
+            var _defaultDamage = 10 * _deck.Count();
+            var _criticalAppliedDamage = Critical.Apply(_deck, _defaultDamage);
+            mState.enemy.DiminishLife(_criticalAppliedDamage);
             return Run<Unit>.Default();
         }
     }

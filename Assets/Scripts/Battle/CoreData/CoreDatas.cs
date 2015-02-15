@@ -74,6 +74,13 @@ namespace Battle.CoreData
     public class Card
     {
         public bool IsClicked { get; set; }
+        public Skill skill;
+
+        public Card()
+        {
+            skill = new Critical();
+        }
+
         public override string ToString()
         {
             return IsClicked.ToString();

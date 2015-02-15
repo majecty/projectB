@@ -44,7 +44,15 @@ namespace Battle.CoreData
             }
         }
 
-        public IEnumerable<Card> ClickedCardIndexes { get { return deck; } }
+        public IEnumerable<Card> ClickedCardIndexes
+        {
+            get
+            {
+                return from card in deck
+                    where card.IsClicked
+                    select card;
+            }
+        }
 
         public string DeckToString()
         {

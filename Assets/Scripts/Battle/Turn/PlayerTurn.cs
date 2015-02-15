@@ -8,7 +8,7 @@ namespace Battle
 {
     public class PlayerTurn : Turn
     {
-        public PlayerTurn(State _state, EventReceiver eventReceiver) : base(_state, eventReceiver) { }
+        public PlayerTurn(State _state, EventReceiver _eventReceiver) : base(_state, _eventReceiver) { }
 
         public override Run<Unit> StartTurn()
         {

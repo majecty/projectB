@@ -6,7 +6,7 @@ namespace Battle
 {
     public class EnemyTurn : Turn
     {
-        public EnemyTurn(State state, EventReceiver eventReceiver) : base(state, eventReceiver) { }
+        public EnemyTurn(State _state, EventReceiver _eventReceiver) : base(_state, _eventReceiver) { }
 
         public override Run<Unit> StartTurn()
         {

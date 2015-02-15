@@ -39,23 +39,21 @@ namespace Battle
         private Run<Unit> WaitingUserClickTurnEnd()
         {
             var _waitingRun = Run<Unit>.MakeDeferred();
+            var _lastCardAnimation = Run<Unit>.Default();
 
-            Action<int> _clickedCardHandler;
-            _clickedCardHandler = (_clickedCardIndex) => {
-                Debug.Log("User clicked " + _clickedCardIndex);
-                if (mState.player.IsClickedCard(_clickedCardIndex))
-                {
-                    mState.player.UnClickCard(_clickedCardIndex);
-                }
-                else
-                {
-                    mState.player.ClickCard(_clickedCardIndex);
-                }
+            Action<int, Run<Unit>> _clickedCardHandler;
+            _clickedCardHandler = (_clickedCardIndex, _eventAnimation) => {
+                _lastCardAnimation = _eventAnimation;
+                SetClicked(_clickedCardIndex);
             };
             mEventReceiver.OnClickCardEvent += _clickedCardHandler;
 
             Action _turnEndButtonHandler;
             _turnEndButtonHandler = () => {
+                if (!_lastCardAnimation.IsDone)
+                    return;
+
+                Debug.Log("Fire event");
                 _waitingRun.Fire(new Unit());
                 mEventReceiver.OnClickCardEvent -= _clickedCardHandler;
                 mEventReceiver.OnClickTurnEndEvent -= _turnEndButtonHandler;
@@ -63,6 +61,19 @@ namespace Battle
             mEventReceiver.OnClickTurnEndEvent += _turnEndButtonHandler;
 
             return _waitingRun;
+        }
+
+        private void SetClicked(int _clickedCardIndex)
+        {
+            Debug.Log("User clicked " + _clickedCardIndex);
+            if (mState.player.IsClickedCard(_clickedCardIndex))
+            {
+                mState.player.UnClickCard(_clickedCardIndex);
+            }
+            else
+            {
+                mState.player.ClickCard(_clickedCardIndex);
+            }
         }
 
         private Run<Unit> Attack()

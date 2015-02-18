@@ -30,7 +30,7 @@ namespace Battle.CoreData
         public float Amount { get; set; }
     }
 
-    public class Recovery : ActiveSkill
+    public class Recover : ActiveSkill
     {
         public float Amount { get; set; }
         public float Duration { get; set; }

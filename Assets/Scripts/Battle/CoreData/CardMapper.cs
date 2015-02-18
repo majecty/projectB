@@ -20,6 +20,9 @@ namespace Battle.CoreData
             = new Dictionary<string, Func<JsonData, ActiveSkill>>
             {
                 {"Attack", AttackImporter},
+                {"Defense", DefenseImporter},
+                {"Recover", RecoverImporter},
+                {"Buff", BuffImporter},
             };
         const IDictionary<string, Func<JsonData, PassiveSkill>> PassiveCategoryTable
             = new Dictionary<string, Func<JsonData, PassiveSkill>>

@@ -6,13 +6,42 @@ namespace Battle.CoreData
 {
     public class ActiveSkill
     {
-        public int cost;
+        public int Cost { get; set; }
     }
 
     public class PassiveSkill
     {
 
     }
+
+    public class Attack : ActiveSkill
+    {
+        public float Power { get; set; }
+        public float Accuracy { get; set; }
+        public string Type { get; set; }
+        public string Condition { get; set; }
+        public float Drain { get; set; }
+        public int Delay { get; set; }
+    }
+
+    public class Defense : ActiveSkill
+    {
+        public float Ratio { get; set; }
+        public float Amount { get; set; }
+    }
+
+    public class Recovery : ActiveSkill
+    {
+        public float Amount { get; set; }
+        public float Duration { get; set; }
+        public string Type { get; set; }
+    }
+
+    public class Buff : ActiveSkill
+    {
+        public string Type { get; set; }
+    }
+
     public class Critical : PassiveSkill
     {
         public static readonly float damageMultiplier = 2.0f;

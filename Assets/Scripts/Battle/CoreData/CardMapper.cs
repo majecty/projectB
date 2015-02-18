@@ -73,6 +73,33 @@ namespace Battle.CoreData
             return attack;
         }
 
+        public static Defense DefenseImporter(JsonData data)
+        {
+            Defense defense = new Defense();
+            defense.Cost = (int)data["cost"];
+            defense.Ratio = (float)data["ratio"];
+            defense.Amount = (float)data["amount"];
+            return defense;
+        }
+
+        public static Recover RecoverImporter(JsonData data)
+        {
+            Recover recover = new Recover();
+            recover.Cost = (int)data["cost"];
+            recover.Amount = (float)data["amount"];
+            recover.Duration = (float)data["duration"];
+            recover.Type = (string)data["type"];
+            return recover;
+        }
+
+        public static Buff BuffImporter(JsonData data)
+        {
+            Buff buff = new Buff();
+            buff.Cost = (int)data["cost"];
+            buff.Type = (string)data["type"];
+            return buff;
+        }
+
         public static Critical CriticalImporter(JsonData data)
         {
             Critical critical = new Critical();

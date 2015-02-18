@@ -44,8 +44,8 @@ namespace Battle.CoreData
 
     public class Critical : PassiveSkill
     {
-        public static readonly float damageMultiplier = 2.0f;
-        public readonly float mProbability = 0.5f;
+        public float Probability { get; set; }
+        public float Multiplier { get; set; }
 
         public static float Apply(IEnumerable<Card> deck, float beforeDamage)
         {
@@ -56,16 +56,16 @@ namespace Battle.CoreData
                 where skill is Critical
                 select skill as Critical;
 
-            var criticalRandomResults = from critical in criticals
+            var successCritical = from critical in criticals
                 let randomValue = Random.Range(0.0f, 1.0f)
-                where randomValue < critical.mProbability
-                select true;
+                where randomValue < critical.Probability
+                select critical;
             
-            var isCriticalSuccess = criticalRandomResults.Any();
-
+            var isCriticalSuccess = successCritical.Any();
+            var criticalMultipliers = successCritical.Sum(critical => critical.Multiplier);
             if (isCriticalSuccess)
             {
-                var afterDamage = beforeDamage * damageMultiplier;
+                var afterDamage = beforeDamage * criticalMultipliers;
                 Debug.Log("Critical applied " + beforeDamage + " -> " + afterDamage);
                 return afterDamage;
             }

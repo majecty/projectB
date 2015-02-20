@@ -16,7 +16,7 @@ namespace Battle.CoreData
 	#endif
     static class CardMapper
     {
-        const IDictionary<string, Func<JsonData, ActiveSkill>> ActiveCategoryTable
+        static IDictionary<string, Func<JsonData, ActiveSkill>> ActiveCategoryTable
             = new Dictionary<string, Func<JsonData, ActiveSkill>>
             {
                 {"Attack", AttackImporter},
@@ -24,7 +24,7 @@ namespace Battle.CoreData
                 {"Recover", RecoverImporter},
                 {"Buff", BuffImporter},
             };
-        const IDictionary<string, Func<JsonData, PassiveSkill>> PassiveCategoryTable
+        static IDictionary<string, Func<JsonData, PassiveSkill>> PassiveCategoryTable
             = new Dictionary<string, Func<JsonData, PassiveSkill>>
             {
                 {"Critical", CriticalImporter},

@@ -44,7 +44,15 @@ namespace Battle.CoreData
             }
         }
 
-        public IEnumerable<Card> ClickedCardIndexes { get { return deck; } }
+        public IEnumerable<Card> ClickedCardIndexes
+        {
+            get
+            {
+                return from card in deck
+                    where card.IsClicked
+                    select card;
+            }
+        }
 
         public string DeckToString()
         {
@@ -66,6 +74,15 @@ namespace Battle.CoreData
     public class Card
     {
         public bool IsClicked { get; set; }
+        public string name;
+        public ActiveSkill activeSkill;
+        public PassiveSkill passiveSkill;
+
+        public Card()
+        {
+            passiveSkill = new Critical();
+        }
+
         public override string ToString()
         {
             return IsClicked.ToString();
